@@ -11,7 +11,6 @@ public:
     Window(int width, int height, const char *title);
     ~Window();
 
-    // This makes sure that we do not have 2 Windows poiting towards the same GLFWwindow
     Window(const Window &) = delete;
     Window operator=(const Window &) = delete;
 

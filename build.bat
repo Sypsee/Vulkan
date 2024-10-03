@@ -12,3 +12,5 @@ sh shaderCompiler.sh
 
 cl /EHsc /std:c++17 %includes% %defines% src/*.cpp src/Core/*.cpp src/Vulkan/*.cpp %links%
 del *.obj
+
+main.exe
