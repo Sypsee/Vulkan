@@ -21,6 +21,7 @@ public:
     inline GLFWwindow *getGLFWwindow() const { return m_Window; }
 
     void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+    void setExtent(VkExtent2D extent);
 
 private:
     static void framebufferResizeCallback(GLFWwindow *window, int width, int height);

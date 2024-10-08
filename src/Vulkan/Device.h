@@ -41,6 +41,8 @@ namespace vk
         const inline VkDevice getDevice() const { return m_VkDevice; }
         const inline VkPhysicalDevice getPhysicalDevice() const { return m_VkPhysicalDevice; }
         const inline VkSurfaceKHR getSurface() const { return m_VkSurface; }
+        const inline VkQueue getGraphicsQueue() const { return m_VkGraphicsQueue; }
+        const inline VkQueue getPresentQueue() const { return m_VkPresentQueue; }
 
     private:
         std::vector<const char*> getRequiredExtensions();

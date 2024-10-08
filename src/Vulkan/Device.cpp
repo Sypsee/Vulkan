@@ -2,6 +2,7 @@
 
 // std
 #include <set>
+#include <string.h>
 
 namespace vk
 {
@@ -270,6 +271,15 @@ namespace vk
         if (m_VkPhysicalDevice == VK_NULL_HANDLE)
         {
             throw std::runtime_error("Failed to find a suitable GPU!");
+        }
+
+        VkSurfaceCapabilitiesKHR surfaceCapabilities;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VkPhysicalDevice, m_VkSurface, &surfaceCapabilities);
+        if (m_Window.getExtent().width > surfaceCapabilities.maxImageExtent.width ||
+            m_Window.getExtent().height > surfaceCapabilities.maxImageExtent.height)
+        {
+            std::cout << "Extent out of bounds\n";
+            m_Window.setExtent(surfaceCapabilities.maxImageExtent);
         }
     }
 
