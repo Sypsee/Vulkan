@@ -15,7 +15,7 @@ Window::Window(int width, int height, const char *title)
         std::cerr << "Failed to init glfw!\n";
     }
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // doing it because we are not using OPENGL.
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);    // non-resizable
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);    // resizable
 
     m_Window = glfwCreateWindow(m_Width, m_Height, title, nullptr, nullptr);
     if (!m_Window)

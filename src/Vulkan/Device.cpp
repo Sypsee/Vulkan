@@ -278,7 +278,6 @@ namespace vk
         if (m_Window.getExtent().width > surfaceCapabilities.maxImageExtent.width ||
             m_Window.getExtent().height > surfaceCapabilities.maxImageExtent.height)
         {
-            std::cout << "Extent out of bounds\n";
             m_Window.setExtent(surfaceCapabilities.maxImageExtent);
         }
     }

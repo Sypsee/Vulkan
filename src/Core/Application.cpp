@@ -8,6 +8,7 @@ Application::Application()
     recreateSwapChain();
     createCommandPool();
     createCommandBuffer();
+    loadModels();
 }
 
 Application::~Application()
@@ -47,6 +48,15 @@ void Application::createCommandBuffer()
     }
 }
 
+void Application::freeCommandBuffer()
+{
+    vkFreeCommandBuffers(m_Device.getDevice(),
+                         m_VkCommandPool,
+                         m_VkCommandBuffers.size(),
+                         m_VkCommandBuffers.data());
+    m_VkCommandBuffers.clear();
+}
+
 void Application::recreateSwapChain()
 {
     VkExtent2D extent = m_Window.getExtent();
@@ -64,6 +74,11 @@ void Application::recreateSwapChain()
     else
     {
         m_SwapChain = std::make_unique<vk::SwapChain>(m_Device, extent, std::move(m_SwapChain));
+        if (m_SwapChain->getImageCount() != m_VkCommandBuffers.size())
+        {
+            freeCommandBuffer();
+            createCommandBuffer();
+        }
     }
     createPipeline();
 }
@@ -111,12 +126,24 @@ void Application::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t im
     scissor.extent = m_SwapChain->getDeviceExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    m_Model->bind(commandBuffer);
+    m_Model->draw(commandBuffer);
 
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!\n");
     }
+}
+
+void Application::loadModels()
+{
+    const std::vector<Model::Vertex> vertices = {
+        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+    };
+
+    m_Model = std::make_unique<Model>(m_Device, vertices);
 }
 
 void Application::run()

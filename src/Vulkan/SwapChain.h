@@ -31,6 +31,7 @@ namespace vk
         VkExtent2D getDeviceExtent() const {return m_DeviceExtent;}
         VkRenderPass getRenderPass() const {return m_VkRenderPass;}
         VkFramebuffer getFramebuffer(const uint32_t i) const {return m_SwapChainFramebuffers[i];}
+        uint32_t getImageCount() { return m_SwapChainImageViews.size(); }
 
     private:
         void init();

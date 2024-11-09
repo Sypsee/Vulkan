@@ -4,6 +4,7 @@
 #include "../Vulkan/Device.h"
 #include "../Vulkan/SwapChain.h"
 #include "../Vulkan/Pipeline.h"
+#include "../Vulkan/Model.h"
 
 class Application
 {
@@ -22,10 +23,12 @@ public:
 private:
     void createCommandPool();
     void createCommandBuffer();
+    void freeCommandBuffer();
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     void drawFrame();
     void createPipeline();
     void recreateSwapChain();
+    void loadModels();
 
     Window m_Window{START_WIDTH, START_HEIGHT, "Vulkan V2"};
     vk::Device m_Device{m_Window};
@@ -34,4 +37,6 @@ private:
 
     VkCommandPool m_VkCommandPool;
     std::vector<VkCommandBuffer> m_VkCommandBuffers;
+
+    std::unique_ptr<Model> m_Model;
 };

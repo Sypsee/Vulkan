@@ -1,4 +1,5 @@
 #include "Pipeline.h"
+#include "Model.h"
 
 namespace vk
 {
@@ -21,17 +22,19 @@ namespace vk
 
     void Pipeline::init()
     {
-        auto vertexShaderCode = readFile("res/shaders/default.vert.spv");
+        // auto compShaderCode = readFile("res/shaders/default.comp.spv");
+        auto vertShaderCode = readFile("res/shaders/default.vert.spv");
         auto fragShaderCode = readFile("res/shaders/default.frag.spv");
 
-        VkShaderModule vertShaderModule = createShaderModule(vertexShaderCode);
+        // VkShaderModule compShaderModule = createShaderModule(compShaderCode);
+        VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
         VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
-        VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = vertShaderModule;
-        vertShaderStageInfo.pName = "main";
+        // VkPipelineShaderStageCreateInfo compShaderStageInfo{};
+        // compShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        // compShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        // compShaderStageInfo.module = compShaderModule;
+        // compShaderStageInfo.pName = "main";
 
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -39,6 +42,13 @@ namespace vk
         fragShaderStageInfo.module = fragShaderModule;
         fragShaderStageInfo.pName = "main";
 
+        VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertShaderStageInfo.module = vertShaderModule;
+        vertShaderStageInfo.pName = "main";
+
+        // VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo, compShaderStageInfo};
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
         std::vector<VkDynamicState> dynamicStates = {
@@ -51,12 +61,14 @@ namespace vk
         dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
         dynamicStateInfo.pDynamicStates = dynamicStates.data();
 
+        auto bindingDescriptions = Model::Vertex::getBindingDescription();
+        auto attributeDescriptions = Model::Vertex::getAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescriptions;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -159,8 +171,9 @@ namespace vk
             throw std::runtime_error("Failed to create graphics pipeline!\n");
         }
 
-        vkDestroyShaderModule(m_Device.getDevice(), vertShaderModule, NULL);
+        // vkDestroyShaderModule(m_Device.getDevice(), compShaderModule, NULL);
         vkDestroyShaderModule(m_Device.getDevice(), fragShaderModule, NULL);
+        vkDestroyShaderModule(m_Device.getDevice(), vertShaderModule, NULL);
     }
 
     VkShaderModule Pipeline::createShaderModule(const std::vector<char>& code)

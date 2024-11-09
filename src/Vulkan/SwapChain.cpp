@@ -17,14 +17,21 @@ namespace vk
 
     SwapChain::~SwapChain()
     {
-        for (auto framebuffer : m_SwapChainFramebuffers) {
-            vkDestroyFramebuffer(m_Device.getDevice(), framebuffer, nullptr);
-        }
-        vkDestroySwapchainKHR(m_Device.getDevice(), m_VkSwapChain, NULL);
         for (VkImageView &imageView : m_SwapChainImageViews)
         {
             vkDestroyImageView(m_Device.getDevice(), imageView, NULL);
         }
+        
+        m_SwapChainImageViews.clear();
+
+        vkDestroySwapchainKHR(m_Device.getDevice(), m_VkSwapChain, NULL);
+
+        for (auto framebuffer : m_SwapChainFramebuffers) {
+            vkDestroyFramebuffer(m_Device.getDevice(), framebuffer, nullptr);
+        }
+
+        m_SwapChainFramebuffers.clear();
+
         vkDestroyRenderPass(m_Device.getDevice(), m_VkRenderPass, nullptr);
 
         for (int i=0; i<MAX_FRAMES_IN_FLIGHT; i++)
@@ -46,7 +53,13 @@ namespace vk
 
     VkResult SwapChain::acquireNextImage(uint32_t *imageIndex)
     {
-        vkWaitForFences(m_Device.getDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        if (m_InFlightFences[m_CurrentFrame] != VK_NULL_HANDLE)
+        {
+            if (vkWaitForFences(m_Device.getDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+            {
+                throw std::runtime_error("Failed waiting on fence! (acquireNextImage) \n");
+            }
+        }
 
         VkResult res = vkAcquireNextImageKHR(m_Device.getDevice(), m_VkSwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, imageIndex);
         return res;
@@ -54,10 +67,13 @@ namespace vk
 
     VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex)
     {
-        if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
-        {
-            vkWaitForFences(m_Device.getDevice(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
-        }
+        // if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE)
+        // {
+        //     if (vkWaitForFences(m_Device.getDevice(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+        //     {
+        //         throw std::runtime_error("Failed waiting on fence! (submitCommandBuffers) \n");
+        //     }
+        // }
  
         m_ImagesInFlight[*imageIndex] = m_InFlightFences[m_CurrentFrame];
 
@@ -147,9 +163,9 @@ namespace vk
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(m_Device.getDevice(), &createInfo, NULL, &m_VkSwapChain) != VK_SUCCESS)
+        VkResult res = vkCreateSwapchainKHR(m_Device.getDevice(), &createInfo, NULL, &m_VkSwapChain);
+        if (res != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create swap chain!\n");
         }
